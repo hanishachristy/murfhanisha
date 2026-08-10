@@ -275,4 +275,134 @@ For deeper documentation on each part, see:
 
 ## License
 
+## Day 5 – The Tools 🛠️
+
+### Local Commerce Tool: Catalogue & Stock Lookup
+
+For Day 5 of the **10 Days of Voice Agents – VoiceForBharat Edition**, I added a real domain-specific tool for the Local Commerce track.
+
+The tool allows the Zen Fresh AI voice agent to look up products from a grocery catalogue and verify their availability before adding anything to the customer's cart.
+
+### What the Catalogue Contains
+
+The local grocery catalogue contains product information such as:
+
+- Product name
+- Product ID
+- Available stock
+- Unit of measurement
+- Emoji / display information
+
+The agent uses this catalogue instead of guessing whether an item is available.
+
+### How the Tool Works
+
+When a customer asks something like:
+
+> "Is 2 kg of rice available?"
+
+the agent uses the catalogue and checks the actual stock before responding.
+
+For an order such as:
+
+> "Add 2 kg of rice to my cart."
+
+the agent:
+
+1. Finds the product in the catalogue.
+2. Checks whether the requested unit matches the catalogue unit.
+3. Checks whether the requested quantity is greater than the available stock.
+4. Adds the item to the cart only if all checks pass.
+5. Returns a natural-language confirmation to the customer.
+
+If the requested quantity is greater than the available stock, the agent does **not** add the item to the cart. Instead, it tells the customer how much is actually available.
+
+### Example
+
+**User:**
+
+> "2 kg tomatoes add pannunga."
+
+**Agent:**
+
+> "2 kg Tomatoes has been added to the cart successfully."
+
+If the requested quantity is unavailable:
+
+**User:**
+
+> "10 kg rice add pannunga."
+
+**Agent:**
+
+> "Only 5 KG of Rice is currently available. Nothing was added."
+
+This prevents the agent from hallucinating stock availability.
+
+### Cart Synchronization
+
+The backend is the source of truth for cart operations.
+
+When an item is successfully added, the backend publishes a cart event to the frontend containing:
+
+- Cart operation
+- Product information
+- Quantity
+- Unit
+- Product ID
+
+The frontend uses this event to update the Produce Basket UI.
+
+The backend also supports:
+
+- Adding items to the cart
+- Removing items from the cart
+- Clearing the cart
+
+This keeps the voice agent, backend cart, and frontend basket synchronized. :contentReference[oaicite:1]{index=1} :contentReference[oaicite:2]{index=2}
+
+### Failure Handling
+
+The agent does not invent an answer when an item cannot be found or cannot be added.
+
+For example:
+
+- Product not found → `"I could not find that item in the catalogue."`
+- Requested quantity exceeds stock → The agent reports the actual available quantity.
+- Invalid quantity → The agent tells the customer that the quantity must be greater than zero.
+- Invalid unit → The agent tells the customer which unit the product uses.
+
+### Data Source
+
+For this prototype, the catalogue is a **local hand-built dataset** rather than a live external API.
+
+This was chosen because the goal of Day 5 is to demonstrate reliable tool calling and domain-specific data retrieval. The agent still uses the catalogue as the source of truth rather than relying on the language model's own knowledge.
+
+### Day 5 Demo
+
+The tool can be demonstrated with questions such as:
+
+- "Is rice available?"
+- "How much rice is in stock?"
+- "Add 2 kg of rice to my cart."
+- "Is 10 kg of rice available?"
+- "Add tomatoes to my cart."
+- "Remove tomatoes from my cart."
+- "Clear my cart."
+
+The important part of the demo is that the agent calls the catalogue/stock tool automatically when the question requires real catalogue data.
+
+### Day 5 Requirements Completed
+
+- [x] Domain-specific tool for Local Commerce
+- [x] Catalogue lookup
+- [x] Stock validation
+- [x] Quantity validation
+- [x] Unit validation
+- [x] Cart integration
+- [x] Natural-language tool results
+- [x] Failure handling without hallucinating stock
+- [x] Frontend cart synchronization
+- [x] Clear indication that the catalogue is local/static data
+
 MIT
